@@ -19,4 +19,8 @@
     <string name="hari">Hari</string>
     <string name="jam">Jam</string>
     <string name="tentang_aplikasi">Tentang Aplikasi</string>
+    <string name="schedule_app">Schedule App</string>
+    <string name="version">Version</string>
+    <string name="last_update">Last Update</string>
+    <string name="by_jasica_ardana_herviyandasari">By Jasica Ardana Herviyandasari</string>
 </resources>
