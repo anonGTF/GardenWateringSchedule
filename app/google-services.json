@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "456496546653",
+    "project_id": "garden-watering-schedule",
+    "storage_bucket": "garden-watering-schedule.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:456496546653:android:13e0675a74e2d2d33edeb4",
+        "android_client_info": {
+          "package_name": "com.jessica.gardenwateringschedulesystem"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "456496546653-cora7caa9akv5pk3r65m0e5namc300mq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbZxPpiw8dmP5uXuCVAgHG-FnZxkMACRI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "456496546653-cora7caa9akv5pk3r65m0e5namc300mq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Garden Watering Schedule System</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+
+    <string name="menu_home">Rute Penyiraman</string>
+    <string name="menu_jadwal">Jadwal Penyiraman</string>
+    <string name="menu_tentang">Tentang</string>
+    <string name="garden_watering_schedule_system">Garden Watering Schedule System</string>
+    <string name="kota_surabaya">Kota Surabaya</string>
+    <string name="welcome_to_garden_watering_schedule_system">Welcome to Garden Watering Schedule System</string>
+    <string name="go_back">Go Back</string>
+    <string name="jadwal_penyiraman_taman">Jadwal Penyiraman Taman</string>
+    <string name="tanggal">Tanggal</string>
+    <string name="hari">Hari</string>
+    <string name="jam">Jam</string>
+    <string name="tentang_aplikasi">Tentang Aplikasi</string>
+</resources>
