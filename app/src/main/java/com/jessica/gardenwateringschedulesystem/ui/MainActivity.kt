@@ -1,4 +1,4 @@
-package com.jessica.gardenwateringschedulesystem
+package com.jessica.gardenwateringschedulesystem.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,12 +10,17 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
+import androidx.navigation.NavController
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.jessica.gardenwateringschedulesystem.R
+import com.jessica.gardenwateringschedulesystem.background.DailyCheck
+import com.jessica.gardenwateringschedulesystem.background.DailyReminder.Companion.TIME_EXTRA
 import com.jessica.gardenwateringschedulesystem.databinding.ActivityMainBinding
 import com.jessica.gardenwateringschedulesystem.utils.USERS
 
@@ -23,6 +28,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private lateinit var navController: NavController
     private val auth: FirebaseAuth = Firebase.auth
     private val db: FirebaseFirestore = Firebase.firestore
 
@@ -32,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(findViewById(R.id.toolbar))
 
-        val navController = findNavController(R.id.nav_host_fragment)
+        navController = findNavController(R.id.nav_host_fragment)
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_home, R.id.nav_jadwal, R.id.nav_tentang
@@ -43,6 +49,21 @@ class MainActivity : AppCompatActivity() {
         binding.navView.setupWithNavController(navController)
 
         setupHeader()
+        setupNotification()
+        showNotif()
+    }
+
+    private fun setupNotification() {
+        val check = DailyCheck()
+        check.checkDailySchedule(applicationContext)
+    }
+
+    private fun showNotif() {
+        val timeExtra = intent.getStringExtra(TIME_EXTRA)
+        if (timeExtra != null) {
+            val bundle = bundleOf("time" to timeExtra)
+            navController.navigate(R.id.nav_home, bundle)
+        }
     }
 
     private fun setupHeader() {
@@ -76,7 +97,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 }

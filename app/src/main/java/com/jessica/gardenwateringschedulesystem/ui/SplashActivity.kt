@@ -1,10 +1,11 @@
-package com.jessica.gardenwateringschedulesystem
+package com.jessica.gardenwateringschedulesystem.ui
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import com.jessica.gardenwateringschedulesystem.R
 
 class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

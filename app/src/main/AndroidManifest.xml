@@ -9,12 +9,25 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GardenWateringScheduleSystem">
-        <activity android:name=".LoginActivity" android:theme="@style/Theme.GardenWateringScheduleSystem.NoActionBar"/>
+        <receiver
+            android:name=".background.DailyCheck"
+            android:enabled="true"
+            android:exported="true"/>
+        <receiver
+            android:name=".background.DailyReminder"
+            android:enabled="true"
+            android:exported="true" />
+
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.LoginActivity"
+            android:theme="@style/Theme.GardenWateringScheduleSystem.NoActionBar" />
+        <activity
+            android:name=".ui.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/Theme.GardenWateringScheduleSystem.NoActionBar" />
-        <activity android:name=".SplashActivity" android:theme="@style/Theme.GardenWateringScheduleSystem.NoActionBar">
+        <activity
+            android:name=".ui.SplashActivity"
+            android:theme="@style/Theme.GardenWateringScheduleSystem.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,4 +1,4 @@
-package com.jessica.gardenwateringschedulesystem.fragment.jadwal
+package com.jessica.gardenwateringschedulesystem.ui.fragment.jadwal
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

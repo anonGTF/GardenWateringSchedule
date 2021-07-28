@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="com.jessica.gardenwateringschedulesystem.fragment.home.HomeFragment"
+        android:name="com.jessica.gardenwateringschedulesystem.ui.fragment.home.HomeFragment"
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/nav_jadwal"
-        android:name="com.jessica.gardenwateringschedulesystem.fragment.jadwal.JadwalFragment"
+        android:name="com.jessica.gardenwateringschedulesystem.ui.fragment.jadwal.JadwalFragment"
         android:label="@string/menu_jadwal"
         tools:layout="@layout/fragment_jadwal" />
 
     <fragment
         android:id="@+id/nav_tentang"
-        android:name="com.jessica.gardenwateringschedulesystem.fragment.tentang.TentangFragment"
+        android:name="com.jessica.gardenwateringschedulesystem.ui.fragment.tentang.TentangFragment"
         android:label="@string/menu_tentang"
         tools:layout="@layout/fragment_tentang" />
 </navigation>

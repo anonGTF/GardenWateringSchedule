@@ -1,20 +1,16 @@
-package com.jessica.gardenwateringschedulesystem.fragment.jadwal
+package com.jessica.gardenwateringschedulesystem.ui.fragment.jadwal
 
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.jessica.gardenwateringschedulesystem.R
 import com.jessica.gardenwateringschedulesystem.databinding.FragmentJadwalBinding
 import com.jessica.gardenwateringschedulesystem.model.Schedule
 import com.jessica.gardenwateringschedulesystem.utils.SCHEDULES

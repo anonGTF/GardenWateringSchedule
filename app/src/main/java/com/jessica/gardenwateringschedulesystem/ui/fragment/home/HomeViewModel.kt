@@ -1,4 +1,4 @@
-package com.jessica.gardenwateringschedulesystem.fragment.home
+package com.jessica.gardenwateringschedulesystem.ui.fragment.home
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
