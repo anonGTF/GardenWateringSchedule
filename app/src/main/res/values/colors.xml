@@ -4,6 +4,7 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="whiteSemiTransparent">#CCFFFFFF</color>
     <color name="colorGreen">#0C9359</color>
     <color name="colorDarkGreen">#06492C</color>
     <color name="colorLightGreen">#800C9359</color>

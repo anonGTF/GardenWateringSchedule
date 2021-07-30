@@ -2,12 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.jessica.gardenwateringschedulesystem">
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:hardwareAccelerated="true"
         android:theme="@style/Theme.GardenWateringScheduleSystem">
         <receiver
             android:name=".background.DailyCheck"
@@ -34,6 +40,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <meta-data
+            android:name="com.here.android.maps.appid"
+            android:value="3wk7Q8tchAdfGAMkvhP1" />
+        <meta-data
+            android:name="com.here.android.maps.apptoken"
+            android:value="3Lbmgu7JUfwOl4WSIks40w" />
+        <meta-data
+            android:name="com.here.android.maps.license.key"
+            android:value="S2XUGkOO9bSF8VBt1HPPE5CcU3ZnwAUc+gX4szfBQc28M7+tTAyXizu1Dvvh5wLPzCeKPhX5AamgCQmrqL11L0u4fPxA7CCXvN7b2wZ9zJpzQdo3WAABN1VT3yXDtoXC8BnYXuPaAOs8xbtrdwIoQ5O4HvLDeWdzsWHIYfw72WNz0cF/Qfx634F3rSb5/0ZxZBXhfZ8tSJqPhY4+L+KwoNNmOV9/EWbERxTVEUC7x1Hfx1v0mMM1c+F27Ok1dbk4S77kKEzR5/icRYkCyBBKt3oGpZbVSnn30Q2lJw28BJtaUs3FB1ptG3ZYFV63+AHW5pjRCA8Vw1ZIu78FssDCPD9lryBoRuoRUjGYf2Ewn0ZOcumsLC+MZaHIC7svscY/8d3yFGH4OSw0upQZy5IdrOKFxs2DH0vVfmhCoeEwNY1FKdXi0gw2fnX90ZeItYjUTKUlg6ERr9SeEdc6VGgPdLSXxbmW7rh7iFVzK1BJtoQej81v2s8N0BCKreB3iUS7C753TkyOHJzYaQ3ZlLLpoHkpNYetq4BsWPxFkLf++cwzfFqK+G11e07JffWIIAlfLT4HgYB/WEKNJzJE5sLeho07Wf+nobW70fVaPrrfPyp3NGvXN5lAJ1CTFy1kgs4jL6lb5qRz1xd1QMzG6qugZRPoAk5akGI1HrxHNmkTVa0=" />
     </application>
 
 </manifest>

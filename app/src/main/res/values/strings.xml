@@ -23,4 +23,7 @@
     <string name="version">Version</string>
     <string name="last_update">Last Update</string>
     <string name="by_jasica_ardana_herviyandasari">By Jasica Ardana Herviyandasari</string>
+    <string name="mulai">Mulai</string>
+    <string name="waktunya_menyiram">Waktunya menyiram!</string>
+    <string name="icon_reminder">icon reminder</string>
 </resources>

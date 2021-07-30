@@ -4,18 +4,20 @@ import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import com.here.android.mpa.common.*
+import com.here.android.mpa.mapping.Map
 import com.jessica.gardenwateringschedulesystem.R
 import com.jessica.gardenwateringschedulesystem.databinding.FragmentHomeBinding
 import com.jessica.gardenwateringschedulesystem.utils.getCurrentDateTime
 import com.jessica.gardenwateringschedulesystem.utils.toString
+import java.io.File
 import java.util.*
+
 
 class HomeFragment : Fragment() {
 
@@ -27,6 +29,7 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
+        MapEngine.getInstance().init(ApplicationContext(requireContext()), engineInitHandler)
         return binding.root
     }
 
@@ -37,6 +40,45 @@ class HomeFragment : Fragment() {
             showNotif(timeExtra)
         }
         showNotif("08:00")
+        initialize()
+    }
+
+    private fun initialize() {
+
+    }
+
+    private val engineInitHandler =
+        OnEngineInitListener { error ->
+            if (error == OnEngineInitListener.Error.NONE) {
+                val map = Map()
+                binding.extMapview.map = map
+                // more map initial settings
+                map.setCenter(
+                    GeoCoordinate(-7.2783266,112.7604853, 0.0),
+                    Map.Animation.BOW
+                )
+                // Set the zoom level to the average between min and max
+                map.zoomLevel = (map.maxZoomLevel + map.minZoomLevel) / 2
+                val cachePath = StringBuilder()
+                    .append(activity?.applicationContext?.getExternalFilesDir(null))
+                    .append(File.separator)
+                    .append(".here-maps")
+                    .toString()
+                MapSettings.setDiskCacheRootPath(cachePath)
+            } else {
+                Log.e("coba", "ERROR: Cannot initialize MapEngine $error")
+            }
+        }
+
+    override fun onResume() {
+        super.onResume()
+        MapEngine.getInstance().onResume()
+        binding.extMapview.onResume()
+    }
+
+    override fun onPause() {
+        MapEngine.getInstance().onPause()
+        super.onPause()
     }
 
     private fun showNotif(time: String) {

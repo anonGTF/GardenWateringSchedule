@@ -36,6 +36,11 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
 }
 
 dependencies {
@@ -64,5 +69,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation 'com.google.firebase:firebase-firestore-ktx'
     implementation 'com.google.firebase:firebase-storage-ktx'
+
+    implementation(name:'HERE-sdk', ext:'aar')
 
 }
