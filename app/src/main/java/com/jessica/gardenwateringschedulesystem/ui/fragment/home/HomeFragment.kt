@@ -1,32 +1,49 @@
 package com.jessica.gardenwateringschedulesystem.ui.fragment.home
 
+import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.here.android.mpa.common.*
 import com.here.android.mpa.guidance.NavigationManager
+import com.here.android.mpa.guidance.NavigationManager.MapUpdateMode
+import com.here.android.mpa.guidance.NavigationManager.NavigationManagerEventListener
 import com.here.android.mpa.mapping.Map
-import com.here.android.mpa.mapping.MapLabeledMarker
 import com.here.android.mpa.mapping.MapMarker
 import com.here.android.mpa.mapping.MapRoute
 import com.here.android.mpa.routing.*
 import com.jessica.gardenwateringschedulesystem.R
 import com.jessica.gardenwateringschedulesystem.databinding.FragmentHomeBinding
-import com.jessica.gardenwateringschedulesystem.utils.getCurrentDateTime
-import com.jessica.gardenwateringschedulesystem.utils.toString
-import java.io.File
+import com.jessica.gardenwateringschedulesystem.foreground.ForegroundService
+import com.jessica.gardenwateringschedulesystem.utils.*
+import java.lang.StringBuilder
+import java.lang.ref.WeakReference
 import java.util.*
 
 
 class HomeFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
+    private lateinit var mMap: Map
+    private lateinit var mNavigationmanager: NavigationManager
+    private lateinit var mGeoboundingbox: GeoBoundingBox
+    private var hasForegroundServiceStarted: Boolean = false
+    private var isStarted: Boolean = false
+    private var mRoute: Route? = null
+    private val auth = Firebase.auth
+    private val db = Firebase.firestore
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,7 +51,6 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
-        MapEngine.getInstance().init(ApplicationContext(requireContext()), engineInitHandler())
         return binding.root
     }
 
@@ -45,77 +61,166 @@ class HomeFragment : Fragment() {
             showNotif(timeExtra)
         }
         showNotif("08:00")
-        initialize()
+        MapEngine.getInstance().init(ApplicationContext(binding.root.context), initMap())
     }
 
-    private fun initialize() {
-
-    }
-
-    private fun engineInitHandler() =
-        OnEngineInitListener { error ->
+    private fun initMap() = OnEngineInitListener { error ->
             if (error == OnEngineInitListener.Error.NONE) {
-                val map = Map()
-                binding.extMapview.map = map
-                // more map initial settings
-                map.setCenter(
-                    GeoCoordinate(-7.2783266,112.7604853, 0.0),
+                binding.extMapview.map = Map()
+                mMap = binding.extMapview.map!!
+                mMap.setCenter(
+                    GeoCoordinate(HOME_LATITUDE, HOME_LONGITUDE),
                     Map.Animation.NONE
                 )
-                val home = MapMarker(GeoCoordinate(-7.2783266,112.7604853, 0.0))
-                // Set the zoom level to the average between min and max
-                map.zoomLevel = (map.maxZoomLevel + map.minZoomLevel) / 2
-                map.addMapObject(home)
-                setupRoute()
-                val cachePath = StringBuilder()
-                    .append(activity?.applicationContext?.getExternalFilesDir(null))
-                    .append(File.separator)
-                    .append(".here-maps")
-                    .toString()
-                MapSettings.setDiskCacheRootPath(cachePath)
+                mMap.zoomLevel = 13.2
+                mMap.addMapObject(MapMarker(GeoCoordinate(HOME_LATITUDE, HOME_LONGITUDE)))
+                mNavigationmanager = NavigationManager.getInstance()
+                db.collection(ROUTES).document(auth.currentUser!!.uid)
+                    .collection(ROUTE_WAYPOINTS).orderBy("id").get()
+                    .addOnSuccessListener { collection ->
+                        createRoute(collection.documents)
+                    }
             } else {
-                Log.e("coba", "ERROR: Cannot initialize MapEngine $error")
+                AlertDialog.Builder(binding.root.context)
+                    .setMessage("Error : ${error.name} ${error.details}")
+                    .setTitle("Engine init error")
+                    .setNegativeButton(android.R.string.cancel) { _, _ -> activity?.finish() }
+                    .create().show()
             }
         }
 
-    private fun setupRoute() {
-        val router = CoreRouter()
+    private fun createRoute(waypoints: List<DocumentSnapshot>) {
+        val coreRouter = CoreRouter()
         val routePlan = RoutePlan()
-            .addWaypoint(RouteWaypoint(GeoCoordinate(-7.2783266,112.7604853)))
-            .addWaypoint(RouteWaypoint(GeoCoordinate(-7.265808, 112.764216)))
-            .addWaypoint(RouteWaypoint(GeoCoordinate(-7.268445, 112.774343)))
-            .addWaypoint(RouteWaypoint(GeoCoordinate(-7.280289, 112.772275)))
-            .addWaypoint(RouteWaypoint(GeoCoordinate(-7.2783266,112.7604853)))
-            .setRouteOptions(RouteOptions()
-                .setTransportMode(RouteOptions.TransportMode.CAR)
-                .setRouteType(RouteOptions.Type.FASTEST))
-        router.calculateRoute(routePlan, object : CoreRouter.Listener {
-            override fun onProgress(percentage: Int) {
-                Log.d("coba", "onProgress: $percentage")
+        val routeOptions = RouteOptions()
+        routeOptions.transportMode = RouteOptions.TransportMode.CAR
+        routeOptions.setHighwaysAllowed(false)
+        routeOptions.routeType = RouteOptions.Type.SHORTEST
+        routeOptions.routeCount = 1
+        routePlan.routeOptions = routeOptions
+        waypoints.forEach { data ->
+            val latitude = data.data?.get("latitude").toString().toDouble()
+            val longitude = data.data?.get("longitude").toString().toDouble()
+            routePlan.addWaypoint(RouteWaypoint(GeoCoordinate(latitude, longitude)))
+        }
+
+        coreRouter.calculateRoute(routePlan,mRouterListener)
+    }
+
+    private val mRouterListener = object : Router.Listener<List<RouteResult>, RoutingError> {
+        override fun onProgress(p0: Int) {
+        }
+
+        override fun onCalculateRouteFinished(routeResults: List<RouteResult>, routingError: RoutingError) {
+            if (routingError == RoutingError.NONE) {
+                mRoute = routeResults[0].route
+                val mapRoute = MapRoute(routeResults[0].route)
+                mapRoute.isManeuverNumberVisible = true
+                mMap.addMapObject(mapRoute)
+                mGeoboundingbox = routeResults[0].route.boundingBox!!
+                mMap.zoomTo(
+                    mGeoboundingbox, Map.Animation.NONE,
+                    Map.MOVE_PRESERVE_ORIENTATION
+                )
+                binding.btnMulai.setOnClickListener {
+                    binding.cvReminder.visibility = View.INVISIBLE
+                    if (!isStarted) {
+                        binding.btnMulai.setText(R.string.stop)
+                        startNavigation()
+                        isStarted = true
+                    } else {
+                        mNavigationmanager.stop()
+                        mMap.zoomTo(mGeoboundingbox, Map.Animation.NONE, 0f)
+                        binding.btnMulai.setText(R.string.mulai)
+                        isStarted = false
+                    }
+                }
+            } else {
+                Toast.makeText(binding.root.context, "Error:route calculation returned error code: $routingError",
+                    Toast.LENGTH_LONG).show()
             }
+        }
 
-            override fun onCalculateRouteFinished(
-                routeResults: MutableList<RouteResult>,
-                error: RoutingError
-            ) {
-                if (error == RoutingError.NONE) {
-                    // Render the route on the map
-                    val mapRoute = MapRoute(routeResults[0].route)
-                    binding.extMapview.map?.addMapObject(mapRoute)
-                    val navManager = NavigationManager.getInstance()
-                    navManager.setMap(binding.extMapview.map)
-                    navManager.startNavigation(routeResults[0].route)
-                    binding.extMapview.map?.mapScheme = Map.Scheme.CARNAV_HYBRID_DAY
-                    navManager.mapUpdateMode = NavigationManager.MapUpdateMode.NONE
+    }
 
-                } else {
-                    // Display a message indicating route calculation failure
-                    Log.d("coba", "onCalculateRouteFinished: ${error.name}")
+    private fun startForegroundService() {
+        if (!hasForegroundServiceStarted) {
+            hasForegroundServiceStarted = true
+            val startIntent = Intent(binding.root.context, ForegroundService::class.java)
+            startIntent.action = ForegroundService.START_ACTION
+            activity?.applicationContext?.startService(startIntent)
+        }
+    }
+
+    private fun stopForegroundService() {
+        if (hasForegroundServiceStarted) {
+            hasForegroundServiceStarted = false
+            val stopIntent = Intent(binding.root.context, ForegroundService::class.java)
+            stopIntent.action = ForegroundService.STOP_ACTION
+            activity?.applicationContext?.startService(stopIntent)
+        }
+    }
+
+    private fun startNavigation() {
+        binding.btnMulai.text = resources.getString(R.string.stop)
+        mNavigationmanager.setMap(mMap)
+        binding.extMapview.map?.positionIndicator?.isVisible = true
+//        mNavigationmanager.startNavigation(mRoute!!)
+        mNavigationmanager.simulate(mRoute!!, 50L)
+        mMap.tilt = 60f
+        startForegroundService()
+        mNavigationmanager.mapUpdateMode = MapUpdateMode.ROADVIEW
+
+        addNavigationListeners()
+    }
+
+    private fun addNavigationListeners() {
+        mNavigationmanager.addNavigationManagerEventListener(
+            WeakReference(mNavigationmanagereventlistener)
+        )
+
+        mNavigationmanager.addNewInstructionEventListener(
+            WeakReference(mNewInstructionListener)
+        )
+    }
+
+    private val mNewInstructionListener = object : NavigationManager.NewInstructionEventListener() {
+            override fun onNewInstructionEvent() {
+                super.onNewInstructionEvent()
+                val maneuver: Maneuver? = mNavigationmanager.nextManeuver
+                if (maneuver != null) {
+                    if (maneuver.action === Maneuver.Action.END) {
+                        binding.tvManeuverInfo.text = "Penyiraman telah selesai"
+                        binding.tvManeuverStreetName.text = "Selamat beristirahat"
+                    } else {
+                        val info = StringBuilder()
+                            .append(maneuver.distanceFromPreviousManeuver)
+                            .append(" Meter, ")
+                            .append(turnToText(maneuver.turn))
+                            .toString()
+                        val road = StringBuilder()
+                            .append("ke ")
+                            .append(maneuver.roadNames[0])
+                            .toString()
+                        binding.tvManeuverInfo.text = info
+                        binding.tvManeuverStreetName.text = road
+                        Glide.with(binding.root.context)
+                            .load(turnIcon(maneuver.turn))
+                            .override(38, 42)
+                            .into(binding.icManeuver)
+                    }
+                    binding.cvManeuver.visibility = View.VISIBLE
                 }
             }
+        }
 
-        })
-    }
+    private val mNavigationmanagereventlistener = object : NavigationManagerEventListener() {
+            override fun onEnded(navigationMode: NavigationManager.NavigationMode) {
+                Toast.makeText(binding.root.context, "$navigationMode was ended", Toast.LENGTH_SHORT).show()
+                stopForegroundService()
+                binding.cvManeuver.visibility = View.INVISIBLE
+            }
+        }
 
     override fun onResume() {
         super.onResume()

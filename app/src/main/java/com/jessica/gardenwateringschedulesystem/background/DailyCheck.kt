@@ -39,6 +39,7 @@ class DailyCheck : BroadcastReceiver() {
         val todayRef = getCurrentDateTime().toString("dd/MM/yyyy")
 
         if (userId != null) {
+            Log.d("coba", "getDailySchedule: $todayRef")
             db.collection(SCHEDULES).document(userId).collection(ref)
                 .whereEqualTo("tanggal", todayRef).get()
                 .addOnSuccessListener { doc ->

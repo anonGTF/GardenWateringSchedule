@@ -71,8 +71,11 @@ class JadwalFragment : Fragment() {
                     Log.d("coba", "onViewCreated: ${it.localizedMessage}")
             }
         }
-
-        binding.tvBulan.text = ref
+        val bulanText = StringBuilder()
+            .append("Bulan : ")
+            .append(ref)
+            .toString()
+        binding.tvBulan.text = bulanText
     }
 
     private fun setupRecyclerView() {

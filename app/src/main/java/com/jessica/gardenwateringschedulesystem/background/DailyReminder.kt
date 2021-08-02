@@ -30,6 +30,7 @@ class DailyReminder : BroadcastReceiver() {
             val time = intent.getStringExtra(TIME_EXTRA)
             if (time != null) {
                 showNotification(context, time)
+                Log.d("coba", "onReceive: notif triggered")
             }
             Log.d("coba", "onReceive: triggered")
         }
