@@ -10,7 +10,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.here.android.mpa.common.*
+import com.here.android.mpa.guidance.NavigationManager
 import com.here.android.mpa.mapping.Map
+import com.here.android.mpa.mapping.MapLabeledMarker
+import com.here.android.mpa.mapping.MapMarker
+import com.here.android.mpa.mapping.MapRoute
+import com.here.android.mpa.routing.*
 import com.jessica.gardenwateringschedulesystem.R
 import com.jessica.gardenwateringschedulesystem.databinding.FragmentHomeBinding
 import com.jessica.gardenwateringschedulesystem.utils.getCurrentDateTime
@@ -29,7 +34,7 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
-        MapEngine.getInstance().init(ApplicationContext(requireContext()), engineInitHandler)
+        MapEngine.getInstance().init(ApplicationContext(requireContext()), engineInitHandler())
         return binding.root
     }
 
@@ -47,7 +52,7 @@ class HomeFragment : Fragment() {
 
     }
 
-    private val engineInitHandler =
+    private fun engineInitHandler() =
         OnEngineInitListener { error ->
             if (error == OnEngineInitListener.Error.NONE) {
                 val map = Map()
@@ -55,10 +60,13 @@ class HomeFragment : Fragment() {
                 // more map initial settings
                 map.setCenter(
                     GeoCoordinate(-7.2783266,112.7604853, 0.0),
-                    Map.Animation.BOW
+                    Map.Animation.NONE
                 )
+                val home = MapMarker(GeoCoordinate(-7.2783266,112.7604853, 0.0))
                 // Set the zoom level to the average between min and max
                 map.zoomLevel = (map.maxZoomLevel + map.minZoomLevel) / 2
+                map.addMapObject(home)
+                setupRoute()
                 val cachePath = StringBuilder()
                     .append(activity?.applicationContext?.getExternalFilesDir(null))
                     .append(File.separator)
@@ -69,6 +77,45 @@ class HomeFragment : Fragment() {
                 Log.e("coba", "ERROR: Cannot initialize MapEngine $error")
             }
         }
+
+    private fun setupRoute() {
+        val router = CoreRouter()
+        val routePlan = RoutePlan()
+            .addWaypoint(RouteWaypoint(GeoCoordinate(-7.2783266,112.7604853)))
+            .addWaypoint(RouteWaypoint(GeoCoordinate(-7.265808, 112.764216)))
+            .addWaypoint(RouteWaypoint(GeoCoordinate(-7.268445, 112.774343)))
+            .addWaypoint(RouteWaypoint(GeoCoordinate(-7.280289, 112.772275)))
+            .addWaypoint(RouteWaypoint(GeoCoordinate(-7.2783266,112.7604853)))
+            .setRouteOptions(RouteOptions()
+                .setTransportMode(RouteOptions.TransportMode.CAR)
+                .setRouteType(RouteOptions.Type.FASTEST))
+        router.calculateRoute(routePlan, object : CoreRouter.Listener {
+            override fun onProgress(percentage: Int) {
+                Log.d("coba", "onProgress: $percentage")
+            }
+
+            override fun onCalculateRouteFinished(
+                routeResults: MutableList<RouteResult>,
+                error: RoutingError
+            ) {
+                if (error == RoutingError.NONE) {
+                    // Render the route on the map
+                    val mapRoute = MapRoute(routeResults[0].route)
+                    binding.extMapview.map?.addMapObject(mapRoute)
+                    val navManager = NavigationManager.getInstance()
+                    navManager.setMap(binding.extMapview.map)
+                    navManager.startNavigation(routeResults[0].route)
+                    binding.extMapview.map?.mapScheme = Map.Scheme.CARNAV_HYBRID_DAY
+                    navManager.mapUpdateMode = NavigationManager.MapUpdateMode.NONE
+
+                } else {
+                    // Display a message indicating route calculation failure
+                    Log.d("coba", "onCalculateRouteFinished: ${error.name}")
+                }
+            }
+
+        })
+    }
 
     override fun onResume() {
         super.onResume()

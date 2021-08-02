@@ -26,4 +26,6 @@
     <string name="mulai">Mulai</string>
     <string name="waktunya_menyiram">Waktunya menyiram!</string>
     <string name="icon_reminder">icon reminder</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="logout">Logout</string>
 </resources>

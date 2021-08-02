@@ -1,17 +1,23 @@
 package com.jessica.gardenwateringschedulesystem.ui
 
+import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.os.bundleOf
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.bundleOf
-import androidx.navigation.NavController
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -24,7 +30,19 @@ import com.jessica.gardenwateringschedulesystem.background.DailyReminder.Compani
 import com.jessica.gardenwateringschedulesystem.databinding.ActivityMainBinding
 import com.jessica.gardenwateringschedulesystem.utils.USERS
 
+
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        const val REQUEST_CODE_ASK_PERMISSIONS = 1
+        val RUNTIME_PERMISSIONS = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET,
+            Manifest.permission.ACCESS_WIFI_STATE,
+            Manifest.permission.ACCESS_NETWORK_STATE
+        )
+    }
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
@@ -37,20 +55,44 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(findViewById(R.id.toolbar))
+        handlePermissions()
+    }
 
+    private fun handlePermissions() {
+        if (hasPermissions(this, *RUNTIME_PERMISSIONS)) {
+            setupNavController()
+            setupHeader()
+            setupNotification()
+            showNotif()
+        } else {
+            ActivityCompat
+                .requestPermissions(this, RUNTIME_PERMISSIONS, REQUEST_CODE_ASK_PERMISSIONS);
+        }
+    }
+
+    private fun hasPermissions(context: Context, vararg permissions: String): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && permissions != null) {
+            for (permission in permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission)
+                    != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return false
+                }
+            }
+        }
+        return true
+    }
+
+    private fun setupNavController() {
         navController = findNavController(R.id.nav_host_fragment)
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_home, R.id.nav_jadwal, R.id.nav_tentang
+                R.id.nav_home, R.id.nav_jadwal, R.id.nav_tentang, R.id.nav_logout
             ), binding.drawerLayout
         )
 
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.navView.setupWithNavController(navController)
-
-        setupHeader()
-        setupNotification()
-        showNotif()
     }
 
     private fun setupNotification() {
@@ -84,6 +126,43 @@ class MainActivity : AppCompatActivity() {
                         .override(76)
                         .into(imgProfile)
                 }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            REQUEST_CODE_ASK_PERMISSIONS -> {
+                var index = 0
+                while (index < permissions.size) {
+                    if (grantResults[index] !== PackageManager.PERMISSION_GRANTED) {
+                        if (!ActivityCompat
+                                .shouldShowRequestPermissionRationale(this, permissions[index])
+                        ) {
+                            Toast.makeText(
+                                this,
+                                "Required permission " + permissions[index] + " not granted. " + "Please go to settings and turn on for sample app",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                this,
+                                "Required permission " + permissions[index] + " not granted",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+                    index++
+                }
+                setupNavController()
+                setupHeader()
+                setupNotification()
+                showNotif()
+            }
+            else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
 

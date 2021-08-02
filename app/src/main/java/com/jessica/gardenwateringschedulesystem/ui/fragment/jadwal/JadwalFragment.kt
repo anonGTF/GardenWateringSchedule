@@ -71,6 +71,8 @@ class JadwalFragment : Fragment() {
                     Log.d("coba", "onViewCreated: ${it.localizedMessage}")
             }
         }
+
+        binding.tvBulan.text = ref
     }
 
     private fun setupRecyclerView() {
