@@ -25,6 +25,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun login(v: View) {
+        showLoading()
         auth = Firebase.auth
         val username = StringBuilder()
             .append(binding.etUsername.text)
@@ -34,6 +35,7 @@ class LoginActivity : AppCompatActivity() {
         if (username.isNotEmpty() && password.isNotEmpty()) {
             auth.signInWithEmailAndPassword(username, password)
                 .addOnCompleteListener(this) { task ->
+                    hideLoading()
                     if (task.isSuccessful) {
                         intent = Intent(this@LoginActivity, MainActivity::class.java)
                         startActivity(intent)
@@ -44,8 +46,17 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
         } else {
+            hideLoading()
             Toast.makeText(baseContext,
                 "Username dan Password tidak boleh kosong", Toast.LENGTH_LONG).show()
         }
+    }
+
+    private fun showLoading() {
+        binding.progressBar.visibility = View.VISIBLE
+    }
+
+    private fun hideLoading() {
+        binding.progressBar.visibility = View.INVISIBLE
     }
 }

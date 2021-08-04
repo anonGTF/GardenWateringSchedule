@@ -52,6 +52,7 @@ class JadwalFragment : Fragment() {
             .toString()
 
         if (userId != null) {
+            showLoading()
             db.collection(SCHEDULES).document(userId).collection(ref).get()
                 .addOnSuccessListener { collection ->
                     val schedules = ArrayList<Schedule>()
@@ -69,6 +70,8 @@ class JadwalFragment : Fragment() {
                     jadwalAdapter.differ.submitList(schedules.sortedBy { it.tanggal })
             } .addOnFailureListener {
                     Log.d("coba", "onViewCreated: ${it.localizedMessage}")
+            } .addOnCompleteListener {
+                hideLoading()
             }
         }
         val bulanText = StringBuilder()
@@ -85,5 +88,13 @@ class JadwalFragment : Fragment() {
             layoutManager = LinearLayoutManager(requireContext())
             addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.VERTICAL))
         }
+    }
+
+    private fun showLoading() {
+        binding.progressBar.visibility = View.VISIBLE
+    }
+
+    private fun hideLoading() {
+        binding.progressBar.visibility = View.INVISIBLE
     }
 }

@@ -61,6 +61,7 @@ class HomeFragment : Fragment() {
             showNotif(timeExtra)
         }
         showNotif("08:00")
+        showLoading()
         MapEngine.getInstance().init(ApplicationContext(binding.root.context), initMap())
     }
 
@@ -139,6 +140,7 @@ class HomeFragment : Fragment() {
                 Toast.makeText(binding.root.context, "Error:route calculation returned error code: $routingError",
                     Toast.LENGTH_LONG).show()
             }
+            hideLoading()
         }
 
     }
@@ -193,6 +195,11 @@ class HomeFragment : Fragment() {
                         binding.tvManeuverInfo.text = "Penyiraman telah selesai"
                         binding.tvManeuverStreetName.text = "Selamat beristirahat"
                     } else {
+                        val roadName = if (maneuver.roadNames.isNotEmpty()) {
+                            maneuver.roadNames[0]
+                        } else {
+                            "Jalan berikutnya"
+                        }
                         val info = StringBuilder()
                             .append(maneuver.distanceFromPreviousManeuver)
                             .append(" Meter, ")
@@ -200,7 +207,7 @@ class HomeFragment : Fragment() {
                             .toString()
                         val road = StringBuilder()
                             .append("ke ")
-                            .append(maneuver.roadNames[0])
+                            .append(roadName)
                             .toString()
                         binding.tvManeuverInfo.text = info
                         binding.tvManeuverStreetName.text = road
@@ -260,5 +267,13 @@ class HomeFragment : Fragment() {
         binding.tvSuggestion.text = suggestion
         binding.cvMulaiRute.visibility = View.VISIBLE
         binding.cvReminder.visibility = View.VISIBLE
+    }
+
+    private fun showLoading() {
+        binding.cvProgress.visibility = View.VISIBLE
+    }
+
+    private fun hideLoading() {
+        binding.cvProgress.visibility = View.INVISIBLE
     }
 }

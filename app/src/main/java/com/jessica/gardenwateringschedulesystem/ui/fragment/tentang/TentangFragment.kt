@@ -27,6 +27,7 @@ class TentangFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        showLoading()
         db.collection(ABOUT).document("1").get()
             .addOnSuccessListener { doc ->
                 val version = doc.data?.get("version").toString()
@@ -40,9 +41,20 @@ class TentangFragment : Fragment() {
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Error: ${it.localizedMessage}", Toast.LENGTH_LONG).show()
             }
+            .addOnCompleteListener {
+                hideLoading()
+            }
 
         binding.btnBack.setOnClickListener {
             activity?.onBackPressed()
         }
+    }
+
+    private fun showLoading() {
+        binding.progressBar.visibility = View.VISIBLE
+    }
+
+    private fun hideLoading() {
+        binding.progressBar.visibility = View.INVISIBLE
     }
 }
