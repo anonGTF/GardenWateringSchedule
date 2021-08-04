@@ -23,13 +23,18 @@ import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.jessica.gardenwateringschedulesystem.R
-import com.jessica.gardenwateringschedulesystem.background.DailyCheck
+import com.jessica.gardenwateringschedulesystem.background.DailyReminder
 import com.jessica.gardenwateringschedulesystem.background.DailyReminder.Companion.TIME_EXTRA
 import com.jessica.gardenwateringschedulesystem.databinding.ActivityMainBinding
+import com.jessica.gardenwateringschedulesystem.utils.SCHEDULES
 import com.jessica.gardenwateringschedulesystem.utils.USERS
+import com.jessica.gardenwateringschedulesystem.utils.monthNumberToString
+import java.lang.StringBuilder
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -97,8 +102,35 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupNotification() {
-        val check = DailyCheck()
-        check.checkDailySchedule(applicationContext)
+        val reminder = DailyReminder()
+        val userId = auth.currentUser?.uid
+        val month = Calendar.getInstance().get(Calendar.MONTH)
+        val year = Calendar.getInstance().get(Calendar.YEAR)
+        val ref = StringBuilder()
+            .append(monthNumberToString(month))
+            .append(" ")
+            .append(year)
+            .toString()
+
+        if (userId != null) {
+            val dbRef = db.collection(SCHEDULES).document(userId).collection(ref)
+            dbRef.whereEqualTo("is_notification_set", false).get()
+                .addOnSuccessListener { collection ->
+                    collection.documents.forEach {
+                        val tanggal = it.data?.get("tanggal").toString()
+                        val jam = it.data?.get("jam").toString()
+                        reminder.setDailyReminder(applicationContext, jam, tanggal)
+                        dbRef.document(it.reference.id)
+                            .set(hashMapOf("is_notification_set" to true), SetOptions.merge())
+                            .addOnSuccessListener {
+                                Log.d("coba", "setupNotification: $tanggal notif set true")
+                            }
+                    }
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "Set notification error", Toast.LENGTH_LONG).show()
+                }
+        }
     }
 
     private fun showNotif() {

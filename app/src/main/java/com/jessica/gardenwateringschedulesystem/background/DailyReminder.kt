@@ -19,7 +19,6 @@ import java.util.*
 class DailyReminder : BroadcastReceiver() {
     companion object {
         const val TIME_EXTRA = "time"
-        const val ID_REMINDER = 102
         const val CHANNEL_ID = "notify-schedule"
         const val CHANNEL_NAME = "garden watering schedule"
         const val NOTIFICATION_ID = 103
@@ -27,24 +26,27 @@ class DailyReminder : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         executeThread {
-            val time = intent.getStringExtra(TIME_EXTRA)
-            if (time != null) {
-                showNotification(context, time)
-                Log.d("coba", "onReceive: notif triggered")
-            }
-            Log.d("coba", "onReceive: triggered")
+            val time = intent.getStringExtra(TIME_EXTRA) ?: "08:00"
+            showNotification(context, time)
+            Log.d("coba", "onReceive: notif triggered")
         }
     }
 
-    fun setDailyReminder(context: Context, time: String) {
+    fun setDailyReminder(context: Context, time: String, date: String) {
         val timeArr = time.split(":").toTypedArray()
+        val dateArr = date.split("/").toTypedArray()
         val calendar = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, timeArr[0].toInt())
             set(Calendar.MINUTE, timeArr[1].toInt())
+            set(Calendar.DAY_OF_MONTH, dateArr[0].toInt())
+            set(Calendar.MONTH, dateArr[1].toInt() - 1)
+            set(Calendar.YEAR, dateArr[2].toInt())
         }
         val intent = Intent(context, DailyReminder::class.java)
         intent.putExtra(TIME_EXTRA, time)
-        val pendingIntent = PendingIntent.getBroadcast(context, ID_REMINDER, intent, 0)
+        Log.d("coba", "setDailyReminder: ${dateArr[0].toInt()} ${dateArr[1].toInt()} ${dateArr[2].toInt()}")
+        val id = dateArr.map { it.toInt() }.sum()
+        val pendingIntent = PendingIntent.getBroadcast(context, id, intent, 0)
         val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         manager.setExact(
             AlarmManager.RTC_WAKEUP,

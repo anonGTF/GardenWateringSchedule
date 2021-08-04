@@ -17,10 +17,6 @@
         android:hardwareAccelerated="true"
         android:theme="@style/Theme.GardenWateringScheduleSystem">
         <receiver
-            android:name=".background.DailyCheck"
-            android:enabled="true"
-            android:exported="true"/>
-        <receiver
             android:name=".background.DailyReminder"
             android:enabled="true"
             android:exported="true" />

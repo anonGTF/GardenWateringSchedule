@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,7 +61,7 @@ class HomeFragment : Fragment() {
         if (timeExtra != null) {
             showNotif(timeExtra)
         }
-        showNotif("08:00")
+//        showNotif("08:00")
         showLoading()
         MapEngine.getInstance().init(ApplicationContext(binding.root.context), initMap())
     }
