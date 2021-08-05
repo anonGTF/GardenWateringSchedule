@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Theme.GardenWateringScheduleSystem" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/colorLightGreen</item>
+        <item name="colorPrimary">@color/colorGreen</item>
         <item name="colorPrimaryVariant">@color/colorDarkGreen</item>
         <item name="colorOnPrimary">@color/black</item>
         <!-- Secondary brand color. -->
