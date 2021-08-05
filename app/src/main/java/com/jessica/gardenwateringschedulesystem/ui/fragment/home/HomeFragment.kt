@@ -294,7 +294,6 @@ class HomeFragment : Fragment() {
             Spannable.SPAN_EXCLUSIVE_INCLUSIVE
         )
         timeToday = time
-//        shouldButtonEnabled()
         binding.tvPerkiraanSelesai.text = endText
         binding.tvSuggestion.text = suggestion
         binding.cvMulaiRute.visibility = View.VISIBLE
@@ -308,18 +307,6 @@ class HomeFragment : Fragment() {
             setupBottomSheet()
         }
     }
-
-//    private fun shouldButtonEnabled() {
-//        val calendar = Calendar.getInstance()
-//        val currTime = calendar.timeInMillis
-//        calendar.set(Calendar.HOUR_OF_DAY, timeToday.split(":")[0].toInt())
-//        calendar.set(Calendar.MINUTE, timeToday.split(":")[1].toInt())
-//        val startTime = calendar.timeInMillis
-//        calendar.add(Calendar.HOUR_OF_DAY, 7)
-//        val endTime = calendar.timeInMillis
-//
-//        binding.btnMulai.isEnabled = currTime in startTime..endTime
-//    }
 
     private fun showNotif() {
         val date = getCurrentDateTime().toString("dd/MM/yyyy")
