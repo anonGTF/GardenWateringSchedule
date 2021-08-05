@@ -40,6 +40,7 @@ class HomeFragment : Fragment() {
     private lateinit var mMap: Map
     private lateinit var mNavigationmanager: NavigationManager
     private lateinit var mGeoboundingbox: GeoBoundingBox
+    private lateinit var timeToday: String
     private var hasForegroundServiceStarted: Boolean = false
     private var isStarted: Boolean = false
     private var mRoute: Route? = null
@@ -59,10 +60,10 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val timeExtra = arguments?.getString("time")
         if (timeExtra != null) {
-            showNotif(timeExtra)
+            showNotif()
         }
-//        showNotif("08:00")
         showLoading()
+        setupBottomSheet()
         MapEngine.getInstance().init(ApplicationContext(binding.root.context), initMap())
     }
 
@@ -77,11 +78,14 @@ class HomeFragment : Fragment() {
                 mMap.zoomLevel = 13.2
                 mMap.addMapObject(MapMarker(GeoCoordinate(HOME_LATITUDE, HOME_LONGITUDE)))
                 mNavigationmanager = NavigationManager.getInstance()
-                db.collection(ROUTES).document(auth.currentUser!!.uid)
-                    .collection(ROUTE_WAYPOINTS).orderBy("id").get()
-                    .addOnSuccessListener { collection ->
-                        createRoute(collection.documents)
-                    }
+                val userId = auth.currentUser?.uid
+                if (userId != null) {
+                    db.collection(ROUTES).document(auth.currentUser!!.uid)
+                        .collection(ROUTE_WAYPOINTS).orderBy("id").get()
+                        .addOnSuccessListener { collection ->
+                            createRoute(collection.documents)
+                        }
+                }
             } else {
                 AlertDialog.Builder(binding.root.context)
                     .setMessage("Error : ${error.name} ${error.details}")
@@ -133,6 +137,7 @@ class HomeFragment : Fragment() {
                     } else {
                         mNavigationmanager.stop()
                         mMap.zoomTo(mGeoboundingbox, Map.Animation.NONE, 0f)
+                        mMap.tilt = 0f
                         binding.btnMulai.setText(R.string.mulai)
                         isStarted = false
                     }
@@ -166,6 +171,7 @@ class HomeFragment : Fragment() {
 
     private fun startNavigation() {
         binding.btnMulai.text = resources.getString(R.string.stop)
+        binding.cvManeuver.visibility = View.VISIBLE
         mNavigationmanager.setMap(mMap)
         binding.extMapview.map?.positionIndicator?.isVisible = true
 //        mNavigationmanager.startNavigation(mRoute!!)
@@ -237,12 +243,37 @@ class HomeFragment : Fragment() {
     }
 
     override fun onPause() {
-        MapEngine.getInstance().onPause()
         super.onPause()
+        MapEngine.getInstance().onPause()
     }
 
-    private fun showNotif(time: String) {
+    private fun setupBottomSheet() {
         val date = getCurrentDateTime().toString("dd/MM/yyyy")
+        val userId = auth.currentUser?.uid
+        val month = Calendar.getInstance().get(Calendar.MONTH)
+        val year = Calendar.getInstance().get(Calendar.YEAR)
+        val ref = StringBuilder()
+            .append(monthNumberToString(month))
+            .append(" ")
+            .append(year)
+            .toString()
+        if (userId != null) {
+            db.collection(SCHEDULES).document(userId).collection(ref).whereEqualTo("tanggal", date)
+                .get().addOnSuccessListener { snapshot ->
+                    if (snapshot.isEmpty) {
+                        showNoScheduleCard()
+                    } else {
+                        Log.d("coba", "setupBottomSheet: $date")
+                        snapshot.documents.forEach {
+                            showStartRouteCard(it)
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun showStartRouteCard(doc: DocumentSnapshot?) {
+        val time = doc?.data?.get("jam").toString()
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, time.split(":")[0].toInt())
         calendar.set(Calendar.MINUTE, time.split(":")[1].toInt())
@@ -262,11 +293,38 @@ class HomeFragment : Fragment() {
             10,
             Spannable.SPAN_EXCLUSIVE_INCLUSIVE
         )
-
-        binding.tvTanggalReminder.text = date
+        timeToday = time
+//        shouldButtonEnabled()
         binding.tvPerkiraanSelesai.text = endText
         binding.tvSuggestion.text = suggestion
         binding.cvMulaiRute.visibility = View.VISIBLE
+        binding.cvTanpaJadwal.visibility = View.INVISIBLE
+    }
+
+    private fun showNoScheduleCard() {
+        binding.cvMulaiRute.visibility = View.INVISIBLE
+        binding.cvTanpaJadwal.visibility = View.VISIBLE
+        binding.btnReload.setOnClickListener {
+            setupBottomSheet()
+        }
+    }
+
+//    private fun shouldButtonEnabled() {
+//        val calendar = Calendar.getInstance()
+//        val currTime = calendar.timeInMillis
+//        calendar.set(Calendar.HOUR_OF_DAY, timeToday.split(":")[0].toInt())
+//        calendar.set(Calendar.MINUTE, timeToday.split(":")[1].toInt())
+//        val startTime = calendar.timeInMillis
+//        calendar.add(Calendar.HOUR_OF_DAY, 7)
+//        val endTime = calendar.timeInMillis
+//
+//        binding.btnMulai.isEnabled = currTime in startTime..endTime
+//    }
+
+    private fun showNotif() {
+        val date = getCurrentDateTime().toString("dd/MM/yyyy")
+
+        binding.tvTanggalReminder.text = date
         binding.cvReminder.visibility = View.VISIBLE
     }
 

@@ -17,6 +17,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="37dp"
+        android:visibility="invisible"
         app:cardCornerRadius="12dp"
         app:cardBackgroundColor="@color/white"
         app:cardElevation="5dp"
@@ -119,6 +120,7 @@
         android:id="@+id/cv_mulai_rute"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:visibility="invisible"
         app:cardCornerRadius="45dp"
         app:cardElevation="0dp"
         app:cardBackgroundColor="@color/whiteSemiTransparent"
@@ -162,6 +164,53 @@
                 android:stateListAnimator="@null"
                 app:cornerRadius="4dp"
                 app:icon="@drawable/ic_near_me"
+                app:iconTint="@color/black"
+                app:backgroundTint="@color/colorLightGreen"/>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cv_tanpa_jadwal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        app:cardCornerRadius="30dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="@color/whiteSemiTransparent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+
+            <TextView
+                android:id="@+id/tv_suggestion_again"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="Tekan tombol refresh jika sudah masuk jadwal!"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_reload"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="25dp"
+                android:layout_marginBottom="25dp"
+                android:text="Refresh"
+                android:textAllCaps="false"
+                android:textColor="@color/black"
+                android:stateListAnimator="@null"
+                app:cornerRadius="4dp"
+                app:icon="@drawable/ic_refresh"
                 app:iconTint="@color/black"
                 app:backgroundTint="@color/colorLightGreen"/>
 

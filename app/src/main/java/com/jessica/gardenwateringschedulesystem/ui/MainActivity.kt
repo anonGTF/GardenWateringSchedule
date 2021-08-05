@@ -1,8 +1,10 @@
 package com.jessica.gardenwateringschedulesystem.ui
 
 import android.Manifest
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -53,6 +55,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
+    private var broadcastReceiver: BroadcastReceiver? = null
     private val auth: FirebaseAuth = Firebase.auth
     private val db: FirebaseFirestore = Firebase.firestore
 
@@ -69,6 +72,7 @@ class MainActivity : AppCompatActivity() {
             setupNavController()
             setupHeader()
             setupNotification()
+            registerReceiver()
             showNotif()
         } else {
             ActivityCompat
@@ -141,6 +145,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun registerReceiver() {
+        broadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val timeExtra = intent?.getStringExtra(TIME_EXTRA)
+                if (timeExtra != null) {
+                    val bundle = bundleOf("time" to timeExtra)
+                    navController.navigate(R.id.nav_home, bundle)
+                }
+            }
+        }
+        registerReceiver(broadcastReceiver, IntentFilter(DailyReminder.TIME_TO_START))
+    }
+
     private fun setupHeader() {
         val header = binding.navView.getHeaderView(0)
         val imgProfile = header.findViewById<ImageView>(R.id.img_profile)
@@ -205,6 +222,13 @@ class MainActivity : AppCompatActivity() {
             intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (broadcastReceiver != null) {
+            unregisterReceiver(broadcastReceiver)
         }
     }
 

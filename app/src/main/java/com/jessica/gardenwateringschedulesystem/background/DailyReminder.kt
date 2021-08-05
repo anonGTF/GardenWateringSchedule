@@ -21,6 +21,7 @@ class DailyReminder : BroadcastReceiver() {
         const val TIME_EXTRA = "time"
         const val CHANNEL_ID = "notify-schedule"
         const val CHANNEL_NAME = "garden watering schedule"
+        const val TIME_TO_START = "time to start"
         const val NOTIFICATION_ID = 103
     }
 
@@ -29,6 +30,9 @@ class DailyReminder : BroadcastReceiver() {
             val time = intent.getStringExtra(TIME_EXTRA) ?: "08:00"
             showNotification(context, time)
             Log.d("coba", "onReceive: notif triggered")
+            val intentMain = Intent(TIME_TO_START)
+            intentMain.putExtra(TIME_EXTRA, time)
+            context.sendBroadcast(intentMain)
         }
     }
 
